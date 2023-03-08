@@ -1,8 +1,16 @@
 #!/bin/bash
+
 path=$1
 shift
 table=$(basename $path)
 sections=$@
+
+export APP_HOME="$(
+    cd "$(dirname $(readlink -nf "$0"))"
+    pwd -P
+)"
+
+echo "--------------   [ $(date '+%F %T') ]   --------------" >> $APP_HOME/hudi-stat.log
 
 for section in $sections; do
     echo
@@ -11,25 +19,28 @@ for section in $sections; do
     if [[ "$section" == "storage" ]]; then
         # show file layout from local with tree cli
         aws s3 sync --delete $path ~/$table --exclude "*$" --exclude ".hoodie/*" --exclude "*/.hoodie*" &>/dev/null
-        tree --du -ahs -D --timefmt '%T' ~/$table
+        tree --du -ahs -D --timefmt '%T' $APP_HOME/$table
+        echo "show $APP_HOME/$table file layouts..." >> $APP_HOME/hudi-stat.log
     else
         # make hudi-cli scripts and execute
-        echo "connect --path $path" > /tmp/hudi-stat.snippets
+        hudiCliScripts="$APP_HOME/.hudi-cli.scripts"
+        echo "connect --path $path" > "$hudiCliScripts"
         case $section in
             timeline)
-                echo "timeline show active" >> /tmp/hudi-stat.snippets
+                echo "timeline show active" >> "$hudiCliScripts"
             ;;
             compactions)
-                echo "compactions show all" >> /tmp/hudi-stat.snippets
+                echo "compactions show all" >> "$hudiCliScripts"
             ;;
             commits)
-                echo "commits show" >> /tmp/hudi-stat.snippets
+                echo "commits show" >> "$hudiCliScripts"
             ;;
             fsview)
-                echo "show fsview all" >> /tmp/hudi-stat.snippets
+                echo "show fsview all" >> "$hudiCliScripts"
             ;;
         esac
         # for hudi-cli, only script mode can exit automatically
-        hudi-cli script /tmp/hudi-stat.snippets 2>/dev/null | grep -o -e '^[╔].*\|^[║].*\|^[╠].*\|^[╟].*\|^[╚].*'
+        hudi-cli script "$hudiCliScripts" 2>/dev/null | grep -o -e '^[╔].*\|^[║].*\|^[╠].*\|^[╟].*\|^[╚].*'
+        cat "$hudiCliScripts" >> $APP_HOME/hudi-stat.log
     fi
 done
