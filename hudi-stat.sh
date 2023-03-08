@@ -1,9 +1,8 @@
 #!/bin/bash
 
-echo "$1"
-path=$1
+path="$1"
 shift
-table=$(basename $path)
+table=$(basename "$path")
 sections=$@
 
 export APP_HOME="$(
