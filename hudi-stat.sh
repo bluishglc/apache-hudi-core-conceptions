@@ -18,7 +18,7 @@ for section in $sections; do
     echo
     if [[ "$section" == "storage" ]]; then
         # show file layout from local with tree cli
-        aws s3 sync --delete $path ~/$table --exclude "*$" --exclude ".hoodie/*" --exclude "*/.hoodie*" &>/dev/null
+        aws s3 sync --delete $path $APP_HOME/$table --exclude "*$" --exclude ".hoodie/*" --exclude "*/.hoodie*" &>/dev/null
         tree --du -ahs -D --timefmt '%T' $APP_HOME/$table
         echo "show $APP_HOME/$table file layouts..." >> $APP_HOME/hudi-stat.log
     else
