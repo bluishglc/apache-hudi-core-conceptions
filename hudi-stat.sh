@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "$1"
 path=$1
 shift
 table=$(basename $path)
@@ -20,7 +21,7 @@ for section in $sections; do
         # show file layout from local with tree cli
         aws s3 sync --delete $path $APP_HOME/$table --exclude "*$" --exclude ".hoodie/*" --exclude "*/.hoodie*" &>/dev/null
         tree --du -ahs -D --timefmt '%T' $APP_HOME/$table
-        echo "show $APP_HOME/$table file layouts..." >> $APP_HOME/hudi-stat.log
+        echo "tree $APP_HOME/$table" >> $APP_HOME/hudi-stat.log
     else
         # make hudi-cli scripts and execute
         hudiCliScripts="$APP_HOME/.hudi-cli.scripts"
