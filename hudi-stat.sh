@@ -19,7 +19,7 @@ for section in $sections; do
     if [[ "$section" == "storage" ]]; then
         # show file layout from local with tree cli
         aws s3 sync --delete $path $APP_HOME/$table --exclude "*$" --exclude ".hoodie/*" --exclude "*/.hoodie*" &>/dev/null
-        tree --du -ahs -D --timefmt '%T' $APP_HOME/$table
+        tree --du -ahs -D --timefmt '%T' --noreport $APP_HOME/$table
         echo "tree $APP_HOME/$table" >> $APP_HOME/hudi-stat.log
     else
         # make hudi-cli scripts and execute
